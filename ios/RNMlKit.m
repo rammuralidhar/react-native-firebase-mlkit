@@ -161,18 +161,29 @@ RCT_REMAP_METHOD(deviceTextRecognition, deviceTextRecognition:(NSString *)imageP
 
                 [output addObject:blocks];
 
+				NSMutableArray *elementArrData = [NSMutableArray array];
                 for (FIRVisionTextLine *line in block.lines) {
                     NSMutableDictionary *lines = [NSMutableDictionary dictionary];
                     lines[@"lineText"] = line.text;
                     [output addObject:lines];
-
+					
                     for (FIRVisionTextElement *element in line.elements) {
                         NSMutableDictionary *elements = [NSMutableDictionary dictionary];
                         elements[@"elementText"] = element.text;
                         [output addObject:elements];
-
+                        
+                        NSMutableDictionary *elementInfo = [NSMutableDictionary dictionary];
+                        elementInfo[@"text"] = element.text;
+                        elementInfo[@"left"]=[NSString stringWithFormat: @"%f", element.cornerPoints[0].CGVectorValue.dx];
+                		elementInfo[@"top"]=[NSString stringWithFormat: @"%f", element.cornerPoints[0].CGVectorValue.dy];
+                		elementInfo[@"width"]=[NSString stringWithFormat: @"%f", element.cornerPoints[2].CGVectorValue.dx-element.cornerPoints[0].CGVectorValue.dx];
+                		elementInfo[@"height"]=[NSString stringWithFormat: @"%f", element.cornerPoints[2].CGVectorValue.dy - element.cornerPoints[0].CGVectorValue.dy];
+                        
+                        [elementArrData addObject:elementInfo];                        
                     }
                 }
+                
+                blocks[@"elementCoordinates"] = elementArrData;
             }
 
             dispatch_async(dispatch_get_main_queue(), ^{
