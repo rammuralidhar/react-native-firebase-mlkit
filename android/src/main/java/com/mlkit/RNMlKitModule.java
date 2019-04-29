@@ -1,4 +1,3 @@
-
 package com.mlkit;
 
 import android.graphics.Rect;
@@ -298,6 +297,7 @@ public class RNMlKitModule extends ReactContextBaseJavaModule {
           List<FirebaseVisionText.Line> lines = blocks.get(i).getLines();
           info = Arguments.createMap();
           coordinates = Arguments.createMap();
+          WritableArray elementArrData = Arguments.createArray();
 
           Rect boundingBox = blocks.get(i).getBoundingBox();
 
@@ -309,6 +309,7 @@ public class RNMlKitModule extends ReactContextBaseJavaModule {
           info.putMap("blockCoordinates", coordinates);
           info.putString("blockText", blocks.get(i).getText());
           info.putString("resultText", firebaseVisionText.getText());
+          coordinates = Arguments.createMap();
 
           for (int j = 0; j < lines.size(); j++) {
               List<FirebaseVisionText.Element> elements = lines.get(j).getElements();
@@ -316,8 +317,18 @@ public class RNMlKitModule extends ReactContextBaseJavaModule {
 
               for (int k = 0; k < elements.size(); k++) {
                   info.putString("elementText", elements.get(k).getText());
+                  Rect elementBoundingBox = elements.get(k).getBoundingBox();
+                  WritableMap elementInfo = Arguments.createMap();
+                  elementInfo.putInt("top", elementBoundingBox.top);
+                  elementInfo.putInt("left", elementBoundingBox.left);
+                  elementInfo.putInt("width", elementBoundingBox.width());
+                  elementInfo.putInt("height", elementBoundingBox.height());
+                  elementInfo.putString("text", elements.get(k).getText());
+                  elementArrData.pushMap(elementInfo);
               }
           }
+          info.putArray("elementCoordinates", elementArrData);
+          info.putMap("blockCoordinates", coordinates);
 
           data.pushMap(info);
       }
